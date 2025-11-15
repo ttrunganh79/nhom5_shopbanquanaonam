@@ -1,0 +1,7 @@
+CREATE TABLE `chucnang` (
+  `id_chucnang` int(11) NOT NULL,
+  `id_vaitro` int(11) NOT NULL,
+  `tenchucnang` varchar(150) NOT NULL,
+  `mota` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
