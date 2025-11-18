@@ -1,6 +1,0 @@
-CREATE TABLE VaiTro (
-    id_vaitro INT PRIMARY KEY AUTO_INCREMENT,
-    tenvaitro NVARCHAR(255),
-    mota NVARCHAR(255),
-    trangthai NVARCHAR(50)
-);
