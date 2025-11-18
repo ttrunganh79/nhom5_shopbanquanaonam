@@ -1,1 +1,280 @@
+CREATE DATABASE IF NOT EXISTS shop_quanaonam CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE shop_quanaonam;
 
+CREATE TABLE VaiTro (
+  id_vaitro INT AUTO_INCREMENT PRIMARY KEY,
+  tenvaitro VARCHAR(100) NOT NULL,
+  mota TEXT,
+  trangthai VARCHAR(50) DEFAULT 'active',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE ChucNang (
+  id_chucnang INT AUTO_INCREMENT PRIMARY KEY,
+  id_vaitro INT NOT NULL,
+  tenchucnang VARCHAR(150) NOT NULL,
+  mota TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_vaitro) REFERENCES VaiTro(id_vaitro) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE NhanVien (
+  id_nhanvien INT AUTO_INCREMENT PRIMARY KEY,
+  manhanvien VARCHAR(50) UNIQUE,
+  hovaten VARCHAR(200),
+  email VARCHAR(255),
+  sdt VARCHAR(50),
+  diachi TEXT,
+  id_vaitro INT,
+  ngaycap DATETIME DEFAULT CURRENT_TIMESTAMP,
+  trangthai VARCHAR(50) DEFAULT 'active',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_vaitro) REFERENCES VaiTro(id_vaitro) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE NguoiDung (
+  id_nguoidung INT AUTO_INCREMENT PRIMARY KEY,
+  hovaten VARCHAR(200) NOT NULL,
+  tendangnhap VARCHAR(100) UNIQUE,
+  matkhau VARCHAR(255) NOT NULL,
+  sdt VARCHAR(50),
+  email VARCHAR(255),
+  diachi TEXT,
+  ngaytao DATETIME DEFAULT CURRENT_TIMESTAMP,
+  trangthai VARCHAR(50) DEFAULT 'active'
+) ENGINE=InnoDB;
+
+CREATE TABLE DanhMuc (
+  id_danhmuc INT AUTO_INCREMENT PRIMARY KEY,
+  tendanhmuc VARCHAR(150) NOT NULL,
+  mota TEXT,
+  thutu INT DEFAULT 0,
+  anh VARCHAR(255),
+  trangthai VARCHAR(50) DEFAULT 'active'
+) ENGINE=InnoDB;
+
+CREATE TABLE Hang (
+  id_hang INT AUTO_INCREMENT PRIMARY KEY,
+  tenhang VARCHAR(150) NOT NULL,
+  mota TEXT
+) ENGINE=InnoDB;
+
+CREATE TABLE SanPham (
+  id_sanpham INT AUTO_INCREMENT PRIMARY KEY,
+  id_danhmuc INT,
+  id_hang INT,
+  masanpham VARCHAR(100) UNIQUE,
+  tensanpham VARCHAR(255) NOT NULL,
+  mota TEXT,
+  anhsp VARCHAR(255),
+  giaban DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  gia_nhap DECIMAL(12,2) DEFAULT 0.00,
+  soluong_tonkho INT DEFAULT 0,
+  trangthai VARCHAR(50) DEFAULT 'active',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_danhmuc) REFERENCES DanhMuc(id_danhmuc) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (id_hang) REFERENCES Hang(id_hang) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE ChatLieu (
+  id_chatlieu INT AUTO_INCREMENT PRIMARY KEY,
+  tenchatlieu VARCHAR(150) NOT NULL,
+  mota TEXT
+) ENGINE=InnoDB;
+
+CREATE TABLE MauSac (
+  id_mausac INT AUTO_INCREMENT PRIMARY KEY,
+  tenmausac VARCHAR(100) NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE ChiTietSanPham (
+  id_chitietsp INT AUTO_INCREMENT PRIMARY KEY,
+  id_sanpham INT NOT NULL,
+  id_mausac INT,
+id_chatlieu INT,
+  kichthuoc VARCHAR(50),
+  gia_ban DECIMAL(12,2),
+  soluong INT DEFAULT 0,
+  anh VARCHAR(255),
+  trangthai VARCHAR(50) DEFAULT 'active',
+  FOREIGN KEY (id_sanpham) REFERENCES SanPham(id_sanpham) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_mausac) REFERENCES MauSac(id_mausac) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (id_chatlieu) REFERENCES ChatLieu(id_chatlieu) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE KhuyenMai (
+  id_khuyenmai INT AUTO_INCREMENT PRIMARY KEY,
+  ma_km VARCHAR(50) UNIQUE,
+  tenkhuyenmai VARCHAR(255),
+  loai_km VARCHAR(50),
+  gia_tri DECIMAL(12,2) DEFAULT 0.00,
+  ngay_bat_dau DATETIME,
+  ngay_ket_thuc DATETIME,
+  dieukien TEXT,
+  trangthai VARCHAR(50) DEFAULT 'active',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE ChiTietKhuyenMai (
+  id_chitietkm INT AUTO_INCREMENT PRIMARY KEY,
+  id_khuyenmai INT NOT NULL,
+  id_sanpham INT NOT NULL,
+  FOREIGN KEY (id_khuyenmai) REFERENCES KhuyenMai(id_khuyenmai) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_sanpham) REFERENCES SanPham(id_sanpham) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE GioHang (
+  id_giohang INT AUTO_INCREMENT PRIMARY KEY,
+  id_nguoidung INT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  trangthai VARCHAR(50) DEFAULT 'active',
+  FOREIGN KEY (id_nguoidung) REFERENCES NguoiDung(id_nguoidung) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE ChiTietGioHang (
+  id_chitietgio INT AUTO_INCREMENT PRIMARY KEY,
+  id_giohang INT NOT NULL,
+  id_chitietsp INT,
+  id_sanpham INT NOT NULL,
+  soluong INT NOT NULL DEFAULT 1,
+  dongia DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  thanhtien DECIMAL(12,2) AS (soluong * dongia) PERSISTENT,
+  FOREIGN KEY (id_giohang) REFERENCES GioHang(id_giohang) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_chitietsp) REFERENCES ChiTietSanPham(id_chitietsp) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (id_sanpham) REFERENCES SanPham(id_sanpham) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE ThanhToan (
+  id_thanhtoan INT AUTO_INCREMENT PRIMARY KEY,
+  id_donhang INT NOT NULL,
+  trangthai VARCHAR(50) DEFAULT 'pending',
+  tongtien DECIMAL(12,2) DEFAULT 0.00,
+  ngaythanhtoan DATETIME,
+  thongtin TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE PhuongThucThanhToan (
+  id_phuongthuc INT AUTO_INCREMENT PRIMARY KEY,
+  tenphuongthuc VARCHAR(150) NOT NULL,
+  mota TEXT,
+  trangthai VARCHAR(50) DEFAULT 'active'
+) ENGINE=InnoDB;
+
+CREATE TABLE DonHang (
+  id_donhang INT AUTO_INCREMENT PRIMARY KEY,
+  id_nguoidung INT,
+  madonhang VARCHAR(100) UNIQUE,
+  ngaydathang DATETIME DEFAULT CURRENT_TIMESTAMP,
+  ngaycapnhat DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  diachigiaohang TEXT,
+  tennguoinhan VARCHAR(255),
+  sdtnguoinhan VARCHAR(50),
+tonggiatien DECIMAL(12,2) DEFAULT 0.00,
+  ghichu TEXT,
+  trangthai VARCHAR(50) DEFAULT 'Chờ xác nhận',
+  id_thanhtoan INT,
+  id_phuongthuc INT,
+  id_nhanvien INT,
+  FOREIGN KEY (id_nguoidung) REFERENCES NguoiDung(id_nguoidung) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (id_thanhtoan) REFERENCES ThanhToan(id_thanhtoan) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (id_phuongthuc) REFERENCES PhuongThucThanhToan(id_phuongthuc) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (id_nhanvien) REFERENCES NhanVien(id_nhanvien) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE ChiTietDonHang (
+  id_chitietdh INT AUTO_INCREMENT PRIMARY KEY,
+  id_donhang INT NOT NULL,
+  id_chitietsp INT,
+  id_sanpham INT NOT NULL,
+  soluong INT NOT NULL DEFAULT 1,
+  dongia DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  thanhtien DECIMAL(12,2) AS (soluong * dongia) PERSISTENT,
+  FOREIGN KEY (id_donhang) REFERENCES DonHang(id_donhang) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_chitietsp) REFERENCES ChiTietSanPham(id_chitietsp) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (id_sanpham) REFERENCES SanPham(id_sanpham) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE TheoDoiDonHang (
+  id_theodoidon INT AUTO_INCREMENT PRIMARY KEY,
+  id_donhang INT NOT NULL,
+  trangthai VARCHAR(100),
+  ghichu TEXT,
+  thoigian DATETIME DEFAULT CURRENT_TIMESTAMP,
+  id_nhanvien INT,
+  FOREIGN KEY (id_donhang) REFERENCES DonHang(id_donhang) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_nhanvien) REFERENCES NhanVien(id_nhanvien) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE NhapKho (
+  id_nhapkho INT AUTO_INCREMENT PRIMARY KEY,
+  id_nhanvien INT,
+  ngaynhap DATETIME DEFAULT CURRENT_TIMESTAMP,
+  tongtien DECIMAL(12,2) DEFAULT 0.00,
+  ghichu TEXT,
+  FOREIGN KEY (id_nhanvien) REFERENCES NhanVien(id_nhanvien) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE ChiTietNhapKho (
+  id_chitietnhapkho INT AUTO_INCREMENT PRIMARY KEY,
+  id_nhapkho INT NOT NULL,
+  id_sanpham INT NOT NULL,
+  id_chitietsp INT,
+  soluong INT NOT NULL DEFAULT 0,
+  dongia DECIMAL(12,2) DEFAULT 0.00,
+  thanhtien DECIMAL(12,2) AS (soluong * dongia) PERSISTENT,
+  FOREIGN KEY (id_nhapkho) REFERENCES NhapKho(id_nhapkho) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_sanpham) REFERENCES SanPham(id_sanpham) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_chitietsp) REFERENCES ChiTietSanPham(id_chitietsp) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE XuatKho (
+  id_xuatkho INT AUTO_INCREMENT PRIMARY KEY,
+  id_donhang INT,
+  id_nhanvien INT,
+  ngayxuat DATETIME DEFAULT CURRENT_TIMESTAMP,
+  tongtien DECIMAL(12,2) DEFAULT 0.00,
+  ghichu TEXT,
+  FOREIGN KEY (id_donhang) REFERENCES DonHang(id_donhang) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (id_nhanvien) REFERENCES NhanVien(id_nhanvien) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE ChiTietXuatKho (
+id_chitietxuatkho INT AUTO_INCREMENT PRIMARY KEY,
+  id_xuatkho INT NOT NULL,
+  id_sanpham INT NOT NULL,
+  id_chitietsp INT,
+  soluong INT NOT NULL DEFAULT 0,
+  dongia DECIMAL(12,2) DEFAULT 0.00,
+  thanhtien DECIMAL(12,2) AS (soluong * dongia) PERSISTENT,
+  FOREIGN KEY (id_xuatkho) REFERENCES XuatKho(id_xuatkho) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_sanpham) REFERENCES SanPham(id_sanpham) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_chitietsp) REFERENCES ChiTietSanPham(id_chitietsp) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE BaoCao (
+  id_baocao INT AUTO_INCREMENT PRIMARY KEY,
+  id_nhanvien INT,
+  tieude VARCHAR(255),
+  noidung TEXT,
+  ngaybaocao DATETIME DEFAULT CURRENT_TIMESTAMP,
+  trangthai VARCHAR(50) DEFAULT 'draft',
+  FOREIGN KEY (id_nhanvien) REFERENCES NhanVien(id_nhanvien) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE LienHe (
+  id_lienhe INT AUTO_INCREMENT PRIMARY KEY,
+  id_nguoidung INT,
+  tieude VARCHAR(255),
+  noidung TEXT,
+  hovaten VARCHAR(200),
+  email VARCHAR(255),
+  sdt VARCHAR(50),
+  thoigian DATETIME DEFAULT CURRENT_TIMESTAMP,
+  trangthai VARCHAR(50) DEFAULT 'new',
+  FOREIGN KEY (id_nguoidung) REFERENCES NguoiDung(id_nguoidung) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
